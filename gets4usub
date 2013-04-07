@@ -20,10 +20,10 @@ my $extensions = qw'\.avi|\.wmv|\.mp4|\.mkv';
 # Declaration of variables...
 my ($silent, $searchTerm, $subFile, $sub, $search_for);
 
-GetOptions ("silent" => \$silent,
+GetOptions ("silent" => sub {$silent = "1"},
 	    "movie" => sub {$search_for = "movie"},
 	    "serie" => sub {$search_for = "serie"});
-
+# Flush
 $|=1;
 
 # unicode support
@@ -51,11 +51,11 @@ sub findfiles {
 # Store as this
 $file = "$dir/$fileName-s4u.rar";  
 
-# First try dirname usualy the best way
+# First try dirname usualy the best.
 $searchTerm = basename($dir);
 $subFile = getSubFile("rls/$searchTerm");
-# If not unique match from dirname try filename
-# fixed some series...
+
+# If not unique match from dirname try filename.
 if (!$subFile) {
    $searchTerm = "$fileName";
    $subFile = getSubFile("fname/$searchTerm");
@@ -95,11 +95,9 @@ sub getSubFile {
 	if (!$search_for) {
             if ($tree->{xmlresult}->{info}->{hits_serie_sub}) {
                 $search_for = "serie" ;
-                print "Found serie hits for $searchTerm \n" ;
             } 
 	    if ($tree->{xmlresult}->{info}->{hits_movie_sub}) {
                 $search_for = "movie" ;
-                print "Found movie hits for $searchTerm \n" ;
             } 
 	} else {
             my $hits_sub = "hits_$search_for\_sub" ;
@@ -115,6 +113,7 @@ sub getSubFile {
                 print "Did not find unique match for $searchTerm \n";
                 return;
            } else {
+		if (!$silent) { print "Found $search_for hit for $searchTerm\n"; }
                 return $tree->{xmlresult}->{$search_for}->{sub}->{download_zip};
            }
         }
@@ -129,5 +128,6 @@ sub usage {
   print "\n";
   exit 1;
 }
+
 1;
 
