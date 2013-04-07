@@ -3,7 +3,9 @@
 # gets4usub script version 1.0.1
 # by jenkins101
 #
-  
+# Depends on libxml-treepp-perl and p7zip-rar 
+#
+
 use strict;
 use File::Basename;
 use XML::TreePP;
@@ -22,8 +24,6 @@ GetOptions ("silent" => \$silent,
 	    "movie" => sub {$search_for = "movie"},
 	    "serie" => sub {$search_for = "serie"});
 
-print "$search_for \n";
-# autoflush;
 $|=1;
 
 # unicode support
@@ -41,13 +41,8 @@ sub findfiles {
   return if $_ =~ /sample/i;
 
   # Split the input...
-  print "$file \n" ;
   my($fileName, $dir, $suffix) = fileparse("$file", qr/\.[^.]*/);
-  print " \n";
-  print "suffix: $suffix \n";
-  print " \n";
   return unless $suffix =~ m/$extensions/io;
-  print "file: $fileName dir: $dir  \n" ;
   if ( -f "$dir$fileName.Swedish.srt" ) {
     if (!$silent) { print "Sub exists for $file\n"; }
     return;
@@ -94,11 +89,8 @@ sub getSubFile {
 # returns subs URL for downloading...
         my ($SearchTerm) = @_;
         my $search_url = "http://api.s4u.se/all/ApiTestKey/xml/all/$SearchTerm/";
-        print " $search_url \n" ;
         my $tpp = XML::TreePP->new();
         my $tree = $tpp->parsehttp( GET => "$search_url" );
-
-	print "$search_for \n";
 
 	if (!$search_for) {
             if ($tree->{xmlresult}->{info}->{hits_serie_sub}) {
@@ -111,11 +103,11 @@ sub getSubFile {
             } 
 	} else {
             my $hits_sub = "hits_$search_for\_sub" ;
-	    print "$hits_sub \n";
 	    if (!$tree->{xmlresult}->{info}->{$hits_sub}) {
 	       return;
 	    }
 	}
+
 	if (!$search_for) {
             return; 
         } else {
@@ -131,7 +123,9 @@ sub getSubFile {
 
 sub usage {
   my $name = fileparse($0);
-  print "usage: $name path-to-search-for-files\n";
+  print "This script takes a path and searches for media files to find subtitles for.\n";
+  print "It takes some optional parameters.\n";
+  print "usage: $name {-silent|(-serie|-movie)} path-to-search-for-files\n";
   print "\n";
   exit 1;
 }
