@@ -1,0 +1,139 @@
+#!/usr/bin/perl
+#
+# gets4usub script version 1.0.1
+# by jenkins101
+#
+  
+use strict;
+use File::Basename;
+use XML::TreePP;
+use LWP::Simple;  
+use File::Find;
+use Getopt::Long;
+use utf8;
+
+# extensions to match in search.
+my $extensions = qw'\.avi|\.wmv|\.mp4|\.mkv';
+
+# Declaration of variables...
+my ($silent, $searchTerm, $subFile, $sub, $search_for);
+
+GetOptions ("silent" => \$silent,
+	    "movie" => sub {$search_for = "movie"},
+	    "serie" => sub {$search_for = "serie"});
+
+print "$search_for \n";
+# autoflush;
+$|=1;
+
+# unicode support
+binmode(STDOUT, ":utf8");
+
+&usage unless $ARGV[0];
+
+# Begin...
+find(\&findfiles,$ARGV[0]);
+
+sub findfiles {
+  my $file = $File::Find::name;
+
+  return unless -f $file;
+  return if $_ =~ /sample/i;
+
+  # Split the input...
+  print "$file \n" ;
+  my($fileName, $dir, $suffix) = fileparse("$file", qr/\.[^.]*/);
+  print " \n";
+  print "suffix: $suffix \n";
+  print " \n";
+  return unless $suffix =~ m/$extensions/io;
+  print "file: $fileName dir: $dir  \n" ;
+  if ( -f "$dir$fileName.Swedish.srt" ) {
+    if (!$silent) { print "Sub exists for $file\n"; }
+    return;
+}
+
+# Store as this
+$file = "$dir/$fileName-s4u.rar";  
+
+# First try dirname usualy the best way
+$searchTerm = basename($dir);
+$subFile = getSubFile("rls/$searchTerm");
+# If not unique match from dirname try filename
+# fixed some series...
+if (!$subFile) {
+   $searchTerm = "$fileName";
+   $subFile = getSubFile("fname/$searchTerm");
+}
+
+# Do we have a URL...
+if (!$subFile || $subFile == 2) {
+   if (!$silent) { print "Could not find sub for $searchTerm \n"; }
+} else {
+   print "Found sub for $searchTerm \n";
+   getstore($subFile,$file,) or die "Failed to fetch $subFile: $!\n";
+
+# Extract and rename to filename...
+   system ("7z e -y -o$dir $file >/dev/null");
+   $sub = `7z t $file | egrep ".sub|.srt"`;
+   $sub =~ s/Testing     //g;
+   chomp($sub);
+   my $count = split("\n",$sub);
+   if ( $count gt 1 ) {
+      print "Multiple subs in archive $file, can't rename... \n";
+      return ;
+   }
+   my $sub = "$dir$sub";
+   my $newsub = "$dir$fileName.Swedish.srt";
+   print "Renaming sub to $newsub \n";
+   rename($sub,$newsub) or die "Failed to rename $sub to $newsub: $!\n";
+}
+}
+
+sub getSubFile {
+# returns subs URL for downloading...
+        my ($SearchTerm) = @_;
+        my $search_url = "http://api.s4u.se/all/ApiTestKey/xml/all/$SearchTerm/";
+        print " $search_url \n" ;
+        my $tpp = XML::TreePP->new();
+        my $tree = $tpp->parsehttp( GET => "$search_url" );
+
+	print "$search_for \n";
+
+	if (!$search_for) {
+            if ($tree->{xmlresult}->{info}->{hits_serie_sub}) {
+                $search_for = "serie" ;
+                print "Found serie hits for $searchTerm \n" ;
+            } 
+	    if ($tree->{xmlresult}->{info}->{hits_movie_sub}) {
+                $search_for = "movie" ;
+                print "Found movie hits for $searchTerm \n" ;
+            } 
+	} else {
+            my $hits_sub = "hits_$search_for\_sub" ;
+	    print "$hits_sub \n";
+	    if (!$tree->{xmlresult}->{info}->{$hits_sub}) {
+	       return;
+	    }
+	}
+	if (!$search_for) {
+            return; 
+        } else {
+           if (ref($tree->{xmlresult}->{$search_for}->{sub}) eq 'ARRAY') {
+                print "Did not find unique match for $searchTerm \n";
+                return;
+           } else {
+                return $tree->{xmlresult}->{$search_for}->{sub}->{download_zip};
+           }
+        }
+
+}
+
+sub usage {
+  my $name = fileparse($0);
+  print "usage: $name path-to-search-for-files\n";
+  print "\n";
+  exit 1;
+}
+1;
+
