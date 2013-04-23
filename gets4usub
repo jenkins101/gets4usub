@@ -17,8 +17,11 @@ use utf8;
 # extensions to match in search.
 my $extensions = qw'\.avi|\.wmv|\.mp4|\.mkv';
 
+# ApiKey max 60 downloads a day.
+my $ApiKey = 'Er3lpPms8511fTTm';
+
 # Declaration of variables...
-my ($silent, $searchTerm, $subFile, $sub, $search_for);
+my ($silent, $searchType, $searchTerm, $subFile, $sub, $search_for);
 
 GetOptions ("silent" => sub {$silent = "1"},
 	    "movie" => sub {$search_for = "movie"},
@@ -53,12 +56,15 @@ $file = "$dir/$fileName-s4u.rar";
 
 # First try dirname usualy the best.
 $searchTerm = basename($dir);
-$subFile = getSubFile("rls/$searchTerm");
+$searchType = "rls";
+$subFile = getSubFile("$searchTerm");
 
 # If not unique match from dirname try filename.
 if (!$subFile) {
+   print "no sub for rel: $searchTerm \n";
+   $searchType = "fname";
    $searchTerm = "$fileName";
-   $subFile = getSubFile("fname/$searchTerm");
+   $subFile = getSubFile("$searchTerm");
 }
 
 # Do we have a URL...
@@ -88,9 +94,11 @@ if (!$subFile || $subFile == 2) {
 sub getSubFile {
 # returns subs URL for downloading...
         my ($SearchTerm) = @_;
-        my $search_url = "http://api.s4u.se/all/ApiTestKey/xml/all/$SearchTerm/";
+        my $search_url = "http://api.s4u.se/all/$ApiKey/xml/all/$searchType/$SearchTerm/";
         my $tpp = XML::TreePP->new();
         my $tree = $tpp->parsehttp( GET => "$search_url" );
+   	print "$search_url \n";
+
 
 	if (!$search_for) {
             if ($tree->{xmlresult}->{info}->{hits_serie_sub}) {
@@ -111,7 +119,12 @@ sub getSubFile {
         } else {
            if (ref($tree->{xmlresult}->{$search_for}->{sub}) eq 'ARRAY') {
                 print "Did not find unique match for $searchTerm \n";
-                return;
+                print "using: $search_url \n";
+		if (($searchType == 'rls') || ($search_for == 'serie')) {
+			return $tree->{xmlresult}->{$search_for}->{sub}->[0]->{download_zip};
+		} else {
+			return;
+		}
            } else {
 		if (!$silent) { print "Found $search_for hit for $searchTerm\n"; }
                 return $tree->{xmlresult}->{$search_for}->{sub}->{download_zip};
