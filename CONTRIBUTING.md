@@ -1,7 +1,7 @@
 ## Questions about OpenELEC?
 
-To get your questions answered, please ask in the OpenELEC [Forum] or on 
-IRC: #openelec on freenode.net (also avaible via our [webchat]) 
+To get your questions answered, please ask in the OpenELEC [Forum] or on IRC: #openelec on freenode.net or [webchat] 
+
 Do not open an issue.
 
 ## Issue Reports
@@ -17,9 +17,7 @@ answer the following questions:
 - What did you expect to happen?
 - What happened instead?
 
-Please also post steps to reproduce. Ideally a failing test would be
-perfect, but even a simple demonstration of the error would suffice.
-Please don't paste logs in issues reports or issue comments use pastebinit instead
+Please also search for similar issues. It's possible somebody has encountered this already. Please don't paste logs in issue reports or issue comments use [sprunge.us](http://sprunge.us) instead
 
 It is always good to provide the zip file found in the logfiles samba share.
 
@@ -27,6 +25,8 @@ Make sure to specify which version of OpenELEC you are using.
 - Version
 - Build
 - Arch
+
+Please don't paste logs in issue reports or issue comments use [sprunge.us](http://sprunge.us) instead
 
 Feature requests are great, but they usually end up lying around the issue
 tracker indefinitely. Sending a pull request is a much better way of getting a
