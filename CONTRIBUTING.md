@@ -1,12 +1,13 @@
 ## Questions about OpenELEC?
 
-To get your questions answered, please ask in the [Forum] or on IRC #openelec.
+To get your questions answered, please ask in the OpenELEC [Forum] or on 
+IRC: #openelec on freenode.net (also avaible via our [webchat]) 
 Do not open an issue.
 
 ## Issue Reports
 
 If you are at all unsure whether it's a bug in OpenELEC or a problem with something
-else, post in the Forum instead. If it turns out that it is a bug, a issue
+else, post in the OpenELEC [Forum] instead. If it turns out that it is a bug, a issue
 can always bee open later.
 
 If you are sure that it's a bug in OpenELEC, open a new [issue] and try to
@@ -46,4 +47,5 @@ particular feature into OpenELEC.
 
 [Forum]: http://openelec.tv/forum
 [issue]: https://github.com/OpenELEC/OpenELEC.tv/issues
+[webchat]: http://openelec.tv/support/chat
 
