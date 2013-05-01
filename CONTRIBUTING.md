@@ -1,6 +1,6 @@
 ## Questions about OpenELEC?
 
-To get your questions answered, please ask in the forum or on IRC #openelec.
+To get your questions answered, please ask in the [Forum] or on IRC #openelec.
 Do not open an issue.
 
 ## Issue Reports
